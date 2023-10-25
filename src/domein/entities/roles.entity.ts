@@ -12,5 +12,5 @@ export class Roles {
   roleName: string;
 
   @ManyToOne(() => Users, (user) => user.roles)
-  userId: Users;
+  user: Users;
 }

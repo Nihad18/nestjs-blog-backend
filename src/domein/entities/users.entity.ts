@@ -29,13 +29,13 @@ export class Users {
   @Column({ nullable: true })
   profileImg: string;
 
-  @OneToMany(() => Roles, (role) => role.userId)
+  @OneToMany(() => Roles, (role) => role.user)
   roles: Roles[];
 
-  @OneToMany(() => Blogs, (author) => author.authorId)
+  @OneToMany(() => Blogs, (author) => author.author)
   blogs: Blogs[];
 
-  @OneToMany(() => Comments, (comment) => comment.userId)
+  @OneToMany(() => Comments, (comment) => comment.user)
   comments: Comments[];
 
   @BeforeInsert()

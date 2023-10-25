@@ -41,9 +41,9 @@ export class Blogs {
   coverImg: string;
 
   @ManyToOne(() => Users, (user) => user.blogs)
-  authorId: Users;
+  author: Users;
 
-  @OneToMany(() => Comments, (comment) => comment.userId)
+  @OneToMany(() => Comments, (comment) => comment.user)
   comments: Comments[];
 
   

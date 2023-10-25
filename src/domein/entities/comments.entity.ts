@@ -29,8 +29,8 @@ export class Comments {
   replies: Comments[];
 
   @ManyToOne(() => Users, (user) => user.comments)
-  userId: Users;
+  user: Users;
 
   @ManyToOne(() => Blogs, (blog) => blog.comments)
-  blogId: Blogs;
+  blog: Blogs;
 }
