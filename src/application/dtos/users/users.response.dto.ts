@@ -1,14 +1,20 @@
 /* eslint-disable prettier/prettier */
 
-import { IsString, IsInt } from 'class-validator';
+import { IsString, IsEmail, MaxLength, MinLength } from 'class-validator';
 
 export class UserResponseDto {
   @IsString()
-  name: string;
+  fullName: string;
 
-  @IsInt()
-  age: number;
+  @IsEmail()
+  email: string;
 
   @IsString()
-  breed: string;
+  @MinLength(7)
+  @MaxLength(30)
+  password: string;
+
+  @IsString()
+  @MaxLength(255)
+  profileImg: string;
 }
