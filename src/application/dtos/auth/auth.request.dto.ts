@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class AuthRequestDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsString()

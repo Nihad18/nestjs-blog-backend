@@ -6,6 +6,7 @@ import {
   MinLength,
   MaxLength,
   IsUUID,
+  IsNotEmpty,
 } from 'class-validator';
 
 export class UserRequestDto {
@@ -13,9 +14,11 @@ export class UserRequestDto {
   id: string;
 
   @IsString()
+  @IsNotEmpty()
   fullName: string;
 
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsString()
