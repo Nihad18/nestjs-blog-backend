@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { IsString, IsEmail, MaxLength, MinLength } from 'class-validator';
+import { Roles } from 'src/domein/entities';
 
 export class UserResponseDto {
   @IsString()
@@ -17,4 +18,6 @@ export class UserResponseDto {
   @IsString()
   @MaxLength(255)
   profileImg: string;
+  
+  roles: Roles[];
 }
