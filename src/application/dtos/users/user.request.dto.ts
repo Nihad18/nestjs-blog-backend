@@ -29,6 +29,8 @@ export class UserRequestDto {
 export class UpdateUserRequestDto {
   @IsString()
   @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
   @IsOptional()
   fullName: string;
   
