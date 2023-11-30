@@ -51,3 +51,19 @@ export class ChangePasswordDto {
   @MaxLength(30)
   oldPassword: string;
 }
+
+export class EmailProcessorDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
+  fullName: string;
+  
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+  
+  @IsString()
+  @IsNotEmpty()
+  otpCode:string;
+}
