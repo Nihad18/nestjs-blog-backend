@@ -1,10 +1,24 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+// typeorm
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
-import { Roles, Users } from 'src/domein/entities';
 import { Repository } from 'typeorm';
-
+// dtos
+import {
+  ChangePasswordDto,
+  UpdateUserRequestDto,
+} from 'src/application/dtos/users/user.request.dto';
+import { UserResponseDto } from 'src/application/dtos/users/users.response.dto';
+// entities
+import { Blogs, Roles, Users } from 'src/domein/entities';
+// jwt packages
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(
@@ -12,6 +26,8 @@ export class UsersService {
     private readonly userRepository: Repository<Users>,
     @InjectRepository(Roles)
     private readonly roleRepository: Repository<Roles>,
+    @InjectRepository(Blogs)
+    private readonly blogRepository: Repository<Blogs>,
   ) {}
 
   async getAllUsers(): Promise<any> {
@@ -19,12 +35,6 @@ export class UsersService {
       relations: {
         roles: true,
       },
-    });
-  }
-
-  async findUserById(id: string): Promise<any> {
-    const user = await this.userRepository.find({
-      relations: ['roles'],
       select: {
         id: true,
         fullName: true,
@@ -34,47 +44,8 @@ export class UsersService {
           roleName: true,
         },
       },
-      where: {
-        id: id,
-      },
     });
-
-    if (!user[0]) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    return user[0];
   }
 
-  async createUser(user: UserRequestDto): Promise<any> {
-    const newUser = new Users();
-    newUser.fullName = user.fullName;
-    newUser.email = user.email;
-    newUser.password = user.password;
-    newUser.profileImg = user.profileImg;
-    try {
-      const savedUser = await this.userRepository.save(newUser);
-
-      const newRole = new Roles();
-      newRole.user = savedUser;
-      newRole.roleName = 'user';
-      await this.roleRepository.save(newRole);
-      const newRole2 = new Roles();
-      newRole2.user = savedUser;
-      newRole2.roleName = 'editor';
-      await this.roleRepository.save(newRole2);
-      const { password, ...result } = savedUser;
-      return result;
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  private async getUserById(id: string): Promise<any> {
-    const user = await this.userRepository.find({ where: { id: id } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-    return user;
-  }
+ 
 }
