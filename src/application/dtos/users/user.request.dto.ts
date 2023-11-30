@@ -26,3 +26,14 @@ export class UserRequestDto {
   password: string;
 }
 
+export class UpdateUserRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  fullName: string;
+  
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  profileImg: string;
+}
