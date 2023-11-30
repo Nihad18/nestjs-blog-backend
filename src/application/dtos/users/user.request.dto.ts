@@ -37,3 +37,15 @@ export class UpdateUserRequestDto {
   @IsOptional()
   profileImg: string;
 }
+
+export class ChangePasswordDto {
+  @IsString()
+  @MinLength(7)
+  @MaxLength(30)
+  newPassword: string;
+
+  @IsString()
+  @MinLength(7)
+  @MaxLength(30)
+  oldPassword: string;
+}
