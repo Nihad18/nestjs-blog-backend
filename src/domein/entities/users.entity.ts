@@ -29,6 +29,15 @@ export class Users {
   @Column({ nullable: true })
   profileImg: string;
 
+  @Column({ nullable: true })
+  otpCode: string;
+
+  @Column({ nullable: true })
+  otpCodeCreatedAt: Date;
+
+  @Column({ nullable: true })
+  isActivated: boolean;
+
   @OneToMany(() => Roles, (role) => role.user)
   roles: Roles[];
 
