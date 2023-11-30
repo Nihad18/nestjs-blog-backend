@@ -6,11 +6,14 @@ import {
   MinLength,
   MaxLength,
   IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 
 export class UserRequestDto {
   @IsString()
   @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
   fullName: string;
 
   @IsEmail()
