@@ -19,6 +19,9 @@ import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
 //entities
 import { Roles, Users } from 'src/domein/entities';
+// bullmq
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,8 +30,56 @@ export class AuthService {
     @InjectRepository(Roles)
     private readonly roleRepository: Repository<Roles>,
     private readonly configService: ConfigService,
+    @InjectQueue('emailSending') private readonly emailQueue: Queue,
   ) {}
 
+  async sendOtp(email: string) {
+    try {
+      const user = await this.getUserByEmail(email);
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      const fullName = await user.fullName;
+      // Generate OTP code
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otpCode = otpCode;
+      user.otpCodeCreatedAt = new Date();
+      await this.userRepository.save(user);
+
+      // Send OTP code via email
+      await this.emailQueue.add('send-otp', { email,fullName, otpCode });
+      return { message: 'OTP sent successfully' };
+    } catch (error) {
+      console.error('Error sending email:', error);
+      throw new Error('Failed to send email');
+    }
+  }
+
+  async activateAccount(email: string, otpCode: string) {
+    const user = await this.getUserByEmail(email);
+
+    if (!user || user.otpCode !== otpCode) {
+      throw new HttpException('Invalid OTP code', HttpStatus.BAD_REQUEST);
+    }
+
+    // Check if OTP code is still valid (within 3 minutes)
+    const otpCreationTime = user.otpCodeCreatedAt.getTime();
+    const currentTime = new Date().getTime();
+    const otpValidityDuration = 3 * 60 * 1000;
+
+    if (currentTime - otpCreationTime > otpValidityDuration) {
+      throw new HttpException('OTP code has expired', HttpStatus.BAD_REQUEST);
+    }
+
+    // Activate the account
+    user.isActivated = true;
+    user.otpCode = null;
+    user.otpCodeCreatedAt = null;
+    await this.userRepository.save(user);
+
+    return { message: 'Account activated successfully' };
+  }
 
   async authenticate(authRequestDto: AuthRequestDto): Promise<AuthResponseDto> {
     // Find the user in the database based on the provided email
@@ -126,4 +177,7 @@ export class AuthService {
     return bcrypt.compare(userReqPassword, userPassword);
   }
 
+  getUserByEmail(email: string): Promise<any> {
+    return this.userRepository.findOne({ where: { email: email } });
+  }
 }
