@@ -1,14 +1,24 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpException,
+  HttpStatus,
   InternalServerErrorException,
   NotFoundException,
   Param,
-  Post,
+  Patch,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
+import {
+  ChangePasswordDto,
+  UpdateUserRequestDto,
+} from 'src/application/dtos/users/user.request.dto';
+import { UserResponseDto } from 'src/application/dtos/users/users.response.dto';
 import { Roles } from 'src/domein/decorators/role.decerator';
 import { Role } from 'src/domein/enums';
 import { JwtAuthGuard } from 'src/domein/guards/jwt-auth-guard';
@@ -19,15 +29,16 @@ import { UsersService } from 'src/domein/services/users/users.service';
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
-  @Roles([Role.Editor])
+  @Roles([Role.Editor, Role.Admin])
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   getAllUsers(): Promise<any> {
     return this.userService.getAllUsers();
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findUserById(@Param('id') id: string) {
+  async findUserById(@Param('id') id: string): Promise<UserResponseDto> {
     try {
       const user = await this.userService.findUserById(id);
       return user;
@@ -41,8 +52,42 @@ export class UsersController {
     }
   }
 
-  @Post()
-  createUser(@Body() user: UserRequestDto) {
-    return this.userService.createUser(user);
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  @UsePipes(ValidationPipe)
+  async updateUserInfo(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserRequestDto,
+  ): Promise<any> {
+    return await this.userService.updateUserInfo(id, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('change-password/:id')
+  @UsePipes(ValidationPipe)
+  async updatePassword(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<any> {
+    try {
+      return await this.userService.changePassword(id, changePasswordDto);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } else if (error instanceof NotFoundException) {
+        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Roles([Role.Admin])
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string): Promise<any> {
+    return await this.userService.deleteUser(id);
   }
 }
