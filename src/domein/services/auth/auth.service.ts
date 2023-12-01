@@ -16,6 +16,7 @@ import { Repository } from 'typeorm';
 //dtos
 import { AuthRequestDto } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
+import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
 //entities
 import { Roles, Users } from 'src/domein/entities';
 @Injectable()
@@ -24,6 +25,7 @@ export class AuthService {
     @InjectRepository(Users)
     private userRepository: Repository<Users>,
     @InjectRepository(Roles)
+    private readonly roleRepository: Repository<Roles>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -74,6 +76,44 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async createUser(user: UserRequestDto): Promise<void | object> {
+    // Check if a user with the provided email already exists in the database
+    const userIsExist = await this.userRepository.findOne({
+      where: { email: user.email },
+    });
+
+    // If a user with the same email exists, throw a BadRequestException
+    if (userIsExist) {
+      throw new HttpException('Email is used before!', HttpStatus.BAD_REQUEST);
+    }
+
+    // Create a new Users entity and populate it with user data
+    const newUser = new Users();
+    newUser.fullName = user.fullName;
+    newUser.email = user.email;
+    // Hash the user's password before storing it in the database
+    newUser.password = await this.hashPasword(user.password);
+
+    try {
+      // Save the new user to the database
+      const savedUser = await this.userRepository.save(newUser);
+
+      // Create a new Roles entity and associate it with the saved user
+      const newRole = new Roles();
+      newRole.user = savedUser;
+      newRole.roleName = 'user';
+
+      // Save the new role to the database
+      await this.roleRepository.save(newRole);
+
+      // Return a success message if the user creation and role assignment are successful
+      return { message: 'User created successfully' };
+    } catch (err) {
+      // If an error occurs during user creation or role assignment, throw a BadRequestException
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   hashPasword(password: string): Promise<string> {
     const saltOrRounds = 10;
     return bcrypt.hash(password, saltOrRounds);
@@ -85,4 +125,5 @@ export class AuthService {
   ): Promise<boolean> {
     return bcrypt.compare(userReqPassword, userPassword);
   }
+
 }
