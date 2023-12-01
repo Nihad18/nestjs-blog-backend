@@ -1,17 +1,29 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
+// modules
 import { PassportModule } from '@nestjs/passport';
-import { AuthController } from 'src/application/controllers/auth/auth.controller';
-import { AuthService } from 'src/domein/services/auth/auth.service';
+import { BullModule } from '@nestjs/bull';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+// custom modules
 import { JwtAuthGuard } from 'src/domein/guards/jwt-auth-guard';
 import { JwtAuthStrategy } from 'src/domein/guards/jwt-auth-strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+// entities
 import { Roles } from 'src/domein/entities/roles.entity';
 import { Users } from 'src/domein/entities';
+//guards
 import { RolesGuard } from 'src/domein/guards/role-guard';
-
+//services
+import { AuthService } from 'src/domein/services/auth/auth.service';
+//controllers
+import { AuthController } from 'src/application/controllers/auth/auth.controller';
+// config files
+import mailConfig from '../../../infrastructure/config/mail.config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EmailProcessor } from 'src/domein/mail/processors/email.processor';
+import * as dotenv from 'dotenv';
+dotenv.config();
 @Module({
   imports: [
     TypeOrmModule.forFeature([Users, Roles]),
@@ -24,8 +36,27 @@ import { RolesGuard } from 'src/domein/guards/role-guard';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    MailerModule.forRootAsync({
+      useFactory: mailConfig,
+    }),
+    BullModule.forRoot({
+      redis: {
+        password: process.env.REDIS_PASSWORD,
+        host: process.env.REDIS_HOST,
+        port: 17082,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'emailSending',
+    }),
   ],
-  providers: [AuthService, JwtAuthStrategy, JwtAuthGuard, RolesGuard],
+  providers: [
+    AuthService,
+    JwtAuthStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    EmailProcessor,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}
