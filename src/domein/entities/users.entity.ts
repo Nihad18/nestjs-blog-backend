@@ -29,7 +29,7 @@ export class Users {
   @Column({ nullable: true })
   profileImg: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true, nullable: true })
   otpCode: string;
 
   @Column({ nullable: true })
