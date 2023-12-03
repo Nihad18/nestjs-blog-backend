@@ -48,7 +48,7 @@ export class AuthService {
       await this.userRepository.save(user);
 
       // Send OTP code via email
-      await this.emailQueue.add('send-otp', { email,fullName, otpCode });
+      await this.emailQueue.add('send-otp', { email, fullName, otpCode });
       return { message: 'OTP sent successfully' };
     } catch (error) {
       console.error('Error sending email:', error);
@@ -59,19 +59,10 @@ export class AuthService {
   async activateAccount(email: string, otpCode: string) {
     const user = await this.getUserByEmail(email);
 
-    if (!user || user.otpCode !== otpCode) {
-      throw new HttpException('Invalid OTP code', HttpStatus.BAD_REQUEST);
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-
-    // Check if OTP code is still valid (within 3 minutes)
-    const otpCreationTime = user.otpCodeCreatedAt.getTime();
-    const currentTime = new Date().getTime();
-    const otpValidityDuration = 3 * 60 * 1000;
-
-    if (currentTime - otpCreationTime > otpValidityDuration) {
-      throw new HttpException('OTP code has expired', HttpStatus.BAD_REQUEST);
-    }
-
+    await this.checkOtpCode(user, otpCode);
     // Activate the account
     user.isActivated = true;
     user.otpCode = null;
@@ -179,5 +170,20 @@ export class AuthService {
 
   getUserByEmail(email: string): Promise<any> {
     return this.userRepository.findOne({ where: { email: email } });
+  }
+
+  async checkOtpCode(user, otpCode: string): Promise<void> {
+    if (user.otpCode !== otpCode) {
+      throw new HttpException('Invalid OTP code', HttpStatus.BAD_REQUEST);
+    }
+
+    // Check if OTP code is still valid (within 3 minutes)
+    const otpCreationTime = user.otpCodeCreatedAt.getTime();
+    const currentTime = new Date().getTime();
+    const otpValidityDuration = 3 * 60 * 1000;
+
+    if (currentTime - otpCreationTime > otpValidityDuration) {
+      throw new HttpException('OTP code has expired', HttpStatus.BAD_REQUEST);
+    }
   }
 }
