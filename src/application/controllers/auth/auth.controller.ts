@@ -1,14 +1,19 @@
 import {
   Body,
   Controller,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
   Post,
   Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+// dtos
 import { AuthRequestDto } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
+// services
 import { AuthService } from 'src/domein/services/auth/auth.service';
 @Controller('auth')
 export class AuthController {
@@ -45,12 +50,18 @@ export class AuthController {
   async activateAccount(
     @Body('email') email: string,
     @Body('otpCode') otpCode: string,
-  ) {
+  ): Promise<object | void> {
     try {
       const response = await this.authService.activateAccount(email, otpCode);
       return response;
     } catch (error) {
-      return { message: 'Failed to send email', error: error.message };
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ error: error.message }, HttpStatus.NOT_FOUND);
+      } else if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      } else {
+        return { error: 'An unexpected error occurred' };
+      }
     }
   }
 }
