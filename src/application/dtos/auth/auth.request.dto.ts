@@ -19,6 +19,9 @@ export class AuthRequestDto {
   @IsString()
   @MinLength(7)
   @MaxLength(30)
+  @IsLowercase()
+  @IsUppercase()
+  @IsAlphanumeric()
   password: string;
 }
 export class ResetPasswordRequestDto {
