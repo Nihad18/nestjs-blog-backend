@@ -1,12 +1,9 @@
 /* eslint-disable prettier/prettier */
 
 import {
-  IsAlphanumeric,
   IsEmail,
-  IsLowercase,
   IsNotEmpty,
   IsString,
-  IsUppercase,
   Matches,
   MaxLength,
   MinLength,
