@@ -7,6 +7,7 @@ import {
   IsNotEmpty,
   IsString,
   IsUppercase,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -19,9 +20,7 @@ export class AuthRequestDto {
   @IsString()
   @MinLength(7)
   @MaxLength(30)
-  @IsLowercase()
-  @IsUppercase()
-  @IsAlphanumeric()
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
   password: string;
 }
 export class ResetPasswordRequestDto {
@@ -30,11 +29,8 @@ export class ResetPasswordRequestDto {
   otpCode: string;
 
   @IsString()
-  @IsNotEmpty()
   @MinLength(7)
   @MaxLength(30)
-  @IsLowercase()
-  @IsUppercase()
-  @IsAlphanumeric()
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
   newPassword: string;
 }
