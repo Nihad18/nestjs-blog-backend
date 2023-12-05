@@ -10,8 +10,10 @@ import {
 } from '@nestjs/common';
 // dtos
 import {
+  ActivateAccountRequestDto,
   AuthRequestDto,
   ResetPasswordRequestDto,
+  SendOtpRequestDto,
 } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
@@ -52,21 +54,22 @@ export class AuthController {
   }
 
   @Post('/send-otp')
-  async sendOtp(@Body('email') email: string) {
-    try {
-      const response = await this.authService.sendOtp(email);
-      return response;
-    } catch (error) {
-      return { message: 'Failed to send email', error: error.message };
-    }
+  @UsePipes(ValidationPipe)
+  async sendOtp(
+    @Body() sendOtpRequestDto: SendOtpRequestDto,
+  ): Promise<object | void> {
+    const response = await this.authService.sendOtp(sendOtpRequestDto);
+    return response;
   }
   @Post('activate-account')
+  @UsePipes(ValidationPipe)
   async activateAccount(
-    @Body('email') email: string,
-    @Body('otpCode') otpCode: string,
+    @Body() activateAccountRequestDto: ActivateAccountRequestDto,
   ): Promise<object | void> {
     try {
-      const response = await this.authService.activateAccount(email, otpCode);
+      const response = await this.authService.activateAccount(
+        activateAccountRequestDto,
+      );
       return response;
     } catch (error) {
       if (error instanceof NotFoundException) {
