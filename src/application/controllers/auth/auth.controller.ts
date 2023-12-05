@@ -5,12 +5,14 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
-  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 // dtos
-import { AuthRequestDto } from 'src/application/dtos/auth/auth.request.dto';
+import {
+  AuthRequestDto,
+  ResetPasswordRequestDto,
+} from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
 // services
@@ -22,7 +24,6 @@ export class AuthController {
   @Post('/login')
   @UsePipes(ValidationPipe)
   async login(
-    @Res() res,
     @Body() authRequestDto: AuthRequestDto,
   ): Promise<AuthResponseDto> {
     const response = await this.authService.authenticate(authRequestDto);
@@ -53,6 +54,26 @@ export class AuthController {
   ): Promise<object | void> {
     try {
       const response = await this.authService.activateAccount(email, otpCode);
+      return response;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ error: error.message }, HttpStatus.NOT_FOUND);
+      } else if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      } else {
+        return { error: 'An unexpected error occurred' };
+      }
+    }
+  }
+  @Post('reset-password')
+  @UsePipes(ValidationPipe)
+  async resetPassoword(
+    @Body() resetPasswordRequestDto: ResetPasswordRequestDto,
+  ): Promise<object | void> {
+    try {
+      const response = await this.authService.resetPassword(
+        resetPasswordRequestDto,
+      );
       return response;
     } catch (error) {
       if (error instanceof NotFoundException) {
