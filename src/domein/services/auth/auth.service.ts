@@ -36,7 +36,7 @@ export class AuthService {
     @InjectQueue('emailSending') private readonly emailQueue: Queue,
   ) {}
 
-  async sendOtp(email: string) {
+  async sendOtp(email: string): Promise<object | void> {
     try {
       const user = await this.getUserByEmail(email);
 
@@ -54,7 +54,6 @@ export class AuthService {
       await this.emailQueue.add('send-otp', { email, fullName, otpCode });
       return { message: 'OTP sent successfully' };
     } catch (error) {
-      console.error('Error sending email:', error);
       throw new Error('Failed to send email');
     }
   }
