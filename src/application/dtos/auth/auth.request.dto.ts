@@ -17,7 +17,9 @@ export class AuthRequestDto {
   @IsString()
   @MinLength(7)
   @MaxLength(30)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'password too weak',
+  })
   password: string;
 }
 export class ResetPasswordRequestDto {
@@ -28,6 +30,22 @@ export class ResetPasswordRequestDto {
   @IsString()
   @MinLength(7)
   @MaxLength(30)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'password too weak',
+  })
   newPassword: string;
+}
+export class SendOtpRequestDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+}
+export class ActivateAccountRequestDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  otpCode: string;
 }
