@@ -14,7 +14,10 @@ import { sign } from 'jsonwebtoken';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 //dtos
-import { AuthRequestDto } from 'src/application/dtos/auth/auth.request.dto';
+import {
+  AuthRequestDto,
+  ResetPasswordRequestDto,
+} from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
 //entities
@@ -72,6 +75,28 @@ export class AuthService {
     return { message: 'Account activated successfully' };
   }
 
+  async resetPassword(resetPasswordRequestDto: ResetPasswordRequestDto) {
+    const { otpCode, newPassword } = resetPasswordRequestDto;
+    const user = await this.userRepository.findOne({
+      where: { otpCode: otpCode },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if OTP code is valid
+    await this.checkOtpCode(user, otpCode);
+
+    // Hash the new password before saving it
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    // Save the updated user to the database
+    await this.userRepository.save(user);
+
+    return { message: 'Password reset successfully' };
+  }
+
   async authenticate(authRequestDto: AuthRequestDto): Promise<AuthResponseDto> {
     // Find the user in the database based on the provided email
     const foundedUser = await this.userRepository.find({
@@ -113,7 +138,6 @@ export class AuthService {
     const refreshToken = sign({ userId: user.id }, jwtSecret, {
       expiresIn: '7d',
     });
-
     // Return the generated tokens as part of the AuthResponseDto
     return { accessToken, refreshToken };
   }
