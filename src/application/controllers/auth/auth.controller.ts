@@ -26,8 +26,21 @@ export class AuthController {
   async login(
     @Body() authRequestDto: AuthRequestDto,
   ): Promise<AuthResponseDto> {
-    const response = await this.authService.authenticate(authRequestDto);
-    return response;
+    try {
+      const response = await this.authService.authenticate(authRequestDto);
+      return response;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ error: error.message }, HttpStatus.NOT_FOUND);
+      } else if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      } else {
+        throw new HttpException(
+          { error: 'An unexpected error occurred' },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
   }
 
   @Post('/register')
