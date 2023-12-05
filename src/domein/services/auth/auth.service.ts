@@ -15,8 +15,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 //dtos
 import {
+  ActivateAccountRequestDto,
   AuthRequestDto,
   ResetPasswordRequestDto,
+  SendOtpRequestDto,
 } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
@@ -36,8 +38,9 @@ export class AuthService {
     @InjectQueue('emailSending') private readonly emailQueue: Queue,
   ) {}
 
-  async sendOtp(email: string): Promise<object | void> {
+  async sendOtp(sendOtpRequestDto: SendOtpRequestDto): Promise<object | void> {
     try {
+      const { email } = sendOtpRequestDto;
       const user = await this.getUserByEmail(email);
 
       if (!user) {
@@ -58,7 +61,8 @@ export class AuthService {
     }
   }
 
-  async activateAccount(email: string, otpCode: string) {
+  async activateAccount(activateAccountRequestDto: ActivateAccountRequestDto) {
+    const { email, otpCode } = activateAccountRequestDto;
     const user = await this.getUserByEmail(email);
 
     if (!user) {
