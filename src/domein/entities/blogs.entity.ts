@@ -19,7 +19,7 @@ export class Blogs {
   @Generated('uuid')
   id: string;
 
-  @Column()
+  @Column({unique: true})
   slug: string;
 
   @Column()
@@ -34,7 +34,7 @@ export class Blogs {
   @Column()
   createdTime: string;
 
-  @Column()
+  @Column({ nullable: true })
   updatedTime: string;
 
   @Column()
@@ -46,7 +46,6 @@ export class Blogs {
   @OneToMany(() => Comments, (comment) => comment.user)
   comments: Comments[];
 
-  
   @ManyToMany(() => Tags, (tag) => tag.blogs)
   @JoinTable()
   tags: Tags[];
