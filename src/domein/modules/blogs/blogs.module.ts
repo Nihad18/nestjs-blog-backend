@@ -5,13 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // controllers
 import { BlogsController } from 'src/application/controllers/blogs/blogs.controller';
 // entities
-import { Blogs, Roles, Users } from 'src/domein/entities';
-import { UuidValidationMiddleware } from 'src/domein/middlewares/uuidvalidation.middleware';
+import { Blogs, Tags, Users } from 'src/domein/entities';
 // services
 import { BlogsService } from 'src/domein/services/blogs/blogs.service';
+// middlewares
+import { UuidValidationMiddleware } from 'src/domein/middlewares/uuidvalidation.middleware';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Users, Roles, Blogs])],
+  imports: [TypeOrmModule.forFeature([Users, Blogs,Tags])],
   providers: [BlogsService],
   controllers: [BlogsController],
 })
