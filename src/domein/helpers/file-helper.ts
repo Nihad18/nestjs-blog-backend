@@ -10,7 +10,7 @@ import {
 } from 'firebase/storage';
 import firebaseConfig from 'src/infrastructure/config/firebase.config';
 @Injectable()
-export class FirebaseService {
+export class FileHelper {
   async uploadFile(file, remoteFilePath: string) {
     const app = firebase.initializeApp(firebaseConfig);
     const storage = getStorage(app);
