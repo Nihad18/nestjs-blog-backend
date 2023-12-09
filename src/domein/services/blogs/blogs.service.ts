@@ -68,7 +68,7 @@ export class BlogsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const fileName = this.filename(file);
+    const fileName = this.createFileName(file);
     const coverImg = await this.fileHelper.uploadFile(file, fileName);
     // Create a new Blog entity and fill it with blog data
     const newBlog = new Blogs();
@@ -98,7 +98,7 @@ export class BlogsService {
   //   updateBlog() {}
   //   deleteBlog() {}
 
-  filename(file): string {
+  createFileName(file): string {
     // Generating a 32 random chars long string
     const randomName = (num) =>
       Array(num)
