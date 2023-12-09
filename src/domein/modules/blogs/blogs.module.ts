@@ -8,12 +8,13 @@ import { BlogsController } from 'src/application/controllers/blogs/blogs.control
 import { Blogs, Tags, Users } from 'src/domein/entities';
 // services
 import { BlogsService } from 'src/domein/services/blogs/blogs.service';
+import { FileHelper } from 'src/domein/helpers/file-helper';
 // middlewares
 import { UuidValidationMiddleware } from 'src/domein/middlewares/uuidvalidation.middleware';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Users, Blogs,Tags])],
-  providers: [BlogsService],
+  providers: [BlogsService,FileHelper],
   controllers: [BlogsController],
 })
 export class BlogModule {
