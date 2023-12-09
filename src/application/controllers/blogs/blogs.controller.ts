@@ -13,6 +13,7 @@ import {
   ValidationPipe,
   Request,
   HttpException,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 // dtos
@@ -48,7 +49,6 @@ export class BlogsController {
   async getAllBlogs(): Promise<any> {
     return await this.blogsService.getAllBlogs();
   }
-
   @Post('/create')
   @Roles([Role.Admin])
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -62,6 +62,26 @@ export class BlogsController {
     try {
       const userId = await req.user.id;
       return this.blogsService.createBlog(blogRequestDto, file, userId);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      }
+      throw new InternalServerErrorException(
+        'An internal server error occurred.',
+      );
+    }
+  }
+
+  @Delete('/:id')
+  @Roles([Role.Admin])
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async deleteBlog(
+    @Param('id') blogId: string,
+    @Request() req,
+  ): Promise<void | object> {
+    try {
+      const userId = await req.user.id;
+      return this.blogsService.deleteBlog(userId, blogId);
     } catch (error) {
       if (error instanceof HttpException) {
         throw new HttpException({ error: error.message }, error.getStatus());
