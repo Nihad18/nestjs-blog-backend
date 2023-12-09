@@ -96,7 +96,21 @@ export class BlogsService {
     return { message: 'Blog created successfully' };
   }
   //   updateBlog() {}
-  //   deleteBlog() {}
+  async deleteBlog(userId: string, id: string) {
+    // Check if a user with the provided id exists in the database
+    const author = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+
+    // If a user doesn`t exists, throw a NotFoundException
+    if (!author) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    // Delete the blog
+    await this.blogRepository.delete({ id });
+
+    return { message: 'Blog deleted successfully' };
+  }
 
   createFileName(file): string {
     // Generating a 32 random chars long string
