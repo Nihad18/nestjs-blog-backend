@@ -9,7 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 //jwt packages
 import * as bcrypt from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import { JwtPayload, sign, verify } from 'jsonwebtoken';
 //typorm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -142,6 +142,44 @@ export class AuthService {
       expiresIn: '7d',
     });
     // Return the generated tokens as part of the AuthResponseDto
+    return { accessToken, refreshToken };
+  }
+
+  async createAccessTokenFromRefreshToken(
+    token: string,
+  ): Promise<AuthResponseDto> {
+    const jwtSecret = await this.configService.get('JWT_SECRET');
+    const decodedToken = verify(token, jwtSecret) as JwtPayload;
+
+    // Check if the decoded token has the expected structure
+    if (
+      !decodedToken ||
+      !decodedToken['userId'] ||
+      !decodedToken['iat'] ||
+      !decodedToken['exp']
+    ) {
+      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
+    }
+    const foundedUser = await this.userRepository.find({
+      where: { id: decodedToken['userId'] },
+      relations: { roles: true },
+    });
+    const user = foundedUser[0];
+    // If no user is found, throw a NotFoundException
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    const isInValid = decodedToken['exp'] < Math.floor(Date.now() / 1000);
+    if (isInValid) {
+      throw new HttpException(
+        'Refresh token has expired',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const accessToken = sign({ ...user }, jwtSecret, { expiresIn: '1h' });
+    const refreshToken = sign({ userId: user.id }, jwtSecret, {
+      expiresIn: '7d',
+    });
     return { accessToken, refreshToken };
   }
 
