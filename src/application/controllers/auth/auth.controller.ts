@@ -5,6 +5,8 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
+  Request,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -16,7 +18,9 @@ import {
   SendOtpRequestDto,
 } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
+// guards
 import { UserRequestDto } from 'src/application/dtos/users/user.request.dto';
+import { JwtAuthGuard } from 'src/domein/guards/jwt-auth-guard';
 // services
 import { AuthService } from 'src/domein/services/auth/auth.service';
 @Controller('auth')
@@ -50,6 +54,21 @@ export class AuthController {
       const response = await this.authService.createAccessTokenFromRefreshToken(
         token,
       );
+      return response;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      } else {
+        throw new HttpException({ error }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+  }
+  @Post('/logout')
+  @UseGuards(JwtAuthGuard)
+  async logOut(@Request() req): Promise<object> {
+    try {
+      const userId = await req.user.id;
+      const response = await this.authService.logOut(userId);
       return response;
     } catch (error) {
       if (error instanceof HttpException) {
