@@ -174,7 +174,7 @@ export class AuthService {
     if (token !== user.refreshToken) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
-    
+
     const isInValid = decodedToken['exp'] < Math.floor(Date.now() / 1000);
     if (isInValid) {
       throw new HttpException(
@@ -192,6 +192,15 @@ export class AuthService {
     await this.userRepository.save(user);
 
     return { accessToken, refreshToken };
+  }
+
+  async logOut(userId: string): Promise<object> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    // If no user is found, throw a NotFoundException
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    user.refreshToken = null;
+    await this.userRepository.save(user);
+    return { message: 'User logout successfully' };
   }
 
   async createUser(user: UserRequestDto): Promise<void | object> {
