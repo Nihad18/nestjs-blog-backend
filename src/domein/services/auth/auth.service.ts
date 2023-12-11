@@ -141,6 +141,9 @@ export class AuthService {
     const refreshToken = sign({ userId: user.id }, jwtSecret, {
       expiresIn: '7d',
     });
+    //added refresh token to user entity
+    user.refreshToken = refreshToken;
+    await this.userRepository.save(user);
     // Return the generated tokens as part of the AuthResponseDto
     return { accessToken, refreshToken };
   }
@@ -168,6 +171,10 @@ export class AuthService {
     // If no user is found, throw a NotFoundException
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
+    if (token !== user.refreshToken) {
+      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
+    }
+    
     const isInValid = decodedToken['exp'] < Math.floor(Date.now() / 1000);
     if (isInValid) {
       throw new HttpException(
@@ -180,6 +187,10 @@ export class AuthService {
     const refreshToken = sign({ userId: user.id }, jwtSecret, {
       expiresIn: '7d',
     });
+    //added refresh token to user entity
+    user.refreshToken = refreshToken;
+    await this.userRepository.save(user);
+
     return { accessToken, refreshToken };
   }
 
