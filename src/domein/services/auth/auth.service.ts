@@ -174,8 +174,9 @@ export class AuthService {
     if (token !== user.refreshToken) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
-
-    const isInValid = decodedToken['exp'] < Math.floor(Date.now() / 1000);
+    const exp =new Date(decodedToken['exp'] * 1000)
+    const now = new Date()
+    const isInValid = exp < now;
     if (isInValid) {
       throw new HttpException(
         'Refresh token has expired',
