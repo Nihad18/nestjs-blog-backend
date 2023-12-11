@@ -29,6 +29,9 @@ export class Users {
   @Column({ nullable: true })
   profileImg: string;
 
+  @Column({ nullable: true })
+  refreshToken: string;
+
   @Column({ unique: true, nullable: true })
   otpCode: string;
 
