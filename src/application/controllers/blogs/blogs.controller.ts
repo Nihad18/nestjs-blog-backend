@@ -14,10 +14,14 @@ import {
   Request,
   HttpException,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 // dtos
-import { CreateBlogRequestDto } from 'src/application/dtos/blogs/blog.request.dto';
+import {
+  CreateBlogRequestDto,
+  UpdateBlogRequestDto,
+} from 'src/application/dtos/blogs/blog.request.dto';
 // decators
 import { Roles } from 'src/domein/decorators/role.decerator';
 // enums
@@ -72,6 +76,29 @@ export class BlogsController {
     }
   }
 
+  @Patch('/:id')
+  @Roles([Role.Admin])
+  @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('coverImg'))
+  async updateBlog(
+    @Param('id') blogId: string,
+    @Request() req,
+    @Body() blogRequestDto: UpdateBlogRequestDto,
+    @UploadedFile() file,
+  ): Promise<void | object> {
+    try {
+      const userId = await req.user.id;
+      return this.blogsService.updateBlog(userId, blogId, blogRequestDto, file);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      }
+      throw new InternalServerErrorException(
+        'An internal server error occurred.',
+      );
+    }
+  }
   @Delete('/:id')
   @Roles([Role.Admin])
   @UseGuards(JwtAuthGuard, RolesGuard)
