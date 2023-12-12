@@ -7,6 +7,7 @@ import {
   IsArray,
   ArrayMinSize,
   ArrayMaxSize,
+  IsOptional,
 } from 'class-validator';
 import { Tags } from 'src/domein/entities';
 
@@ -35,5 +36,37 @@ export class CreateBlogRequestDto {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(10)
+  tags: Tags[];
+}
+export class UpdateBlogRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(10)
+  @MaxLength(100)
+  @IsOptional()
+  slug: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(250)
+  @MaxLength(5000)
+  @IsOptional()
+  content: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(80)
+  @MaxLength(250)
+  @IsOptional()
+  summary: string;
+
+  @IsNotEmpty()
+  @IsOptional()
+  published: boolean;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(10)
+  @IsOptional()
   tags: Tags[];
 }
