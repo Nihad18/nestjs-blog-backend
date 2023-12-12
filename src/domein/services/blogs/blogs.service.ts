@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import path = require('path');
-import { CreateBlogRequestDto } from 'src/application/dtos/blogs/blog.request.dto';
+import {
+  CreateBlogRequestDto,
+  UpdateBlogRequestDto,
+} from 'src/application/dtos/blogs/blog.request.dto';
 import { Blogs, Tags, Users } from 'src/domein/entities';
 import { FileHelper } from 'src/domein/helpers/file-helper';
 import { Repository } from 'typeorm';
@@ -95,8 +98,12 @@ export class BlogsService {
     // Return a success message if the blog creation is successful
     return { message: 'Blog created successfully' };
   }
-  //   updateBlog() {}
-  async deleteBlog(userId: string, id: string) {
+  async updateBlog(
+    userId: string,
+    id: string,
+    blogRequestDto: UpdateBlogRequestDto,
+    file,
+  ) {
     // Check if a user with the provided id exists in the database
     const author = await this.usersRepository.findOne({
       where: { id: userId },
@@ -106,6 +113,45 @@ export class BlogsService {
     if (!author) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+    const slug = await this.blogRepository.findOne({
+      where: { slug: blogRequestDto.slug },
+    });
+    if (slug) {
+      throw new HttpException('Slug already exists', HttpStatus.BAD_REQUEST);
+    }
+    if (!file) {
+      throw new HttpException('File is required!', HttpStatus.BAD_REQUEST);
+    }
+    if (file.originalname.length > 100 || file.originalname.length < 10) {
+      throw new HttpException(
+        'File name must be contain longer than 10 character or shorter than 100 character',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const blog = await this.blogRepository.findOne({ where: { id: id } });
+    // Create a new Tag entity and associate it with the saved blog
+    for (const tagDto of blogRequestDto.tags) {
+      const tag = new Tags();
+      tag.tagName = tagDto.tagName;
+
+      // Associate the tag with the saved blog
+      tag.blogs = [blog];
+      // Save the tag to create the many-to-many relationship
+      await this.tagsRepository.save(tag);
+    }
+    await this.blogRepository.update(id, blogRequestDto);
+    return { message: 'blog updated successfully' };
+  }
+  async deleteBlog(userId: string, id: string) {
+    // Check if a user with the provided id exists in the database
+    const author = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+    // If a user doesn`t exists, throw a NotFoundException
+    if (!author) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    await this.fileHelper.deleteFile(author.profileImg);
     // Delete the blog
     await this.blogRepository.delete({ id });
 
