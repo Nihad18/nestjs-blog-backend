@@ -48,21 +48,6 @@ export class AuthController {
       }
     }
   }
-  @Post('/refresh-token')
-  async refreshToken(@Body('token') token: string): Promise<AuthResponseDto> {
-    try {
-      const response = await this.authService.createAccessTokenFromRefreshToken(
-        token,
-      );
-      return response;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw new HttpException({ error: error.message }, error.getStatus());
-      } else {
-        throw new HttpException({ error }, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
-  }
   @Post('/logout')
   @UseGuards(JwtAuthGuard)
   async logOut(@Request() req): Promise<object> {
