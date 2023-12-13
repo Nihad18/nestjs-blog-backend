@@ -138,6 +138,9 @@ export class AuthService {
     // Generate JWT tokens for authentication
     const jwtSecret = this.configService.get('JWT_SECRET');
     const accessToken = sign({ ...user }, jwtSecret, { expiresIn: '7d' });
+    // added access token to user entity
+    user.accessToken = accessToken;
+    this.userRepository.save(user);
     // Return the generated tokens as part of the AuthResponseDto
     return { accessToken };
   }
@@ -146,7 +149,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     // If no user is found, throw a NotFoundException
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    user.refreshToken = null;
+    user.accessToken = null;
     await this.userRepository.save(user);
     return { message: 'User logout successfully' };
   }
