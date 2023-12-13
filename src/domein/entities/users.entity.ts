@@ -30,7 +30,7 @@ export class Users {
   profileImg: string;
 
   @Column({ nullable: true })
-  refreshToken: string;
+  accessToken: string;
 
   @Column({ unique: true, nullable: true })
   otpCode: string;
