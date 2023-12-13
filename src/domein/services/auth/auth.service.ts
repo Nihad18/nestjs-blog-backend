@@ -137,17 +137,10 @@ export class AuthService {
 
     // Generate JWT tokens for authentication
     const jwtSecret = this.configService.get('JWT_SECRET');
-    const accessToken = sign({ ...user }, jwtSecret, { expiresIn: '1h' });
-    const refreshToken = sign({ userId: user.id }, jwtSecret, {
-      expiresIn: '7d',
-    });
-    //added refresh token to user entity
-    user.refreshToken = refreshToken;
-    await this.userRepository.save(user);
+    const accessToken = sign({ ...user }, jwtSecret, { expiresIn: '7d' });
     // Return the generated tokens as part of the AuthResponseDto
-    return { accessToken, refreshToken };
+    return { accessToken };
   }
-
 
   async logOut(userId: string): Promise<object> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
