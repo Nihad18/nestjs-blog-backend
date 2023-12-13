@@ -148,52 +148,6 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async createAccessTokenFromRefreshToken(
-    token: string,
-  ): Promise<AuthResponseDto> {
-    const jwtSecret = await this.configService.get('JWT_SECRET');
-    const decodedToken = verify(token, jwtSecret) as JwtPayload;
-
-    // Check if the decoded token has the expected structure
-    if (
-      !decodedToken ||
-      !decodedToken['userId'] ||
-      !decodedToken['iat'] ||
-      !decodedToken['exp']
-    ) {
-      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
-    }
-    const foundedUser = await this.userRepository.find({
-      where: { id: decodedToken['userId'] },
-      relations: { roles: true },
-    });
-    const user = foundedUser[0];
-    // If no user is found, throw a NotFoundException
-    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-
-    if (token !== user.refreshToken) {
-      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
-    }
-    const exp =new Date(decodedToken['exp'] * 1000)
-    const now = new Date()
-    const isInValid = exp < now;
-    if (isInValid) {
-      throw new HttpException(
-        'Refresh token has expired',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const accessToken = sign({ ...user }, jwtSecret, { expiresIn: '1h' });
-    const refreshToken = sign({ userId: user.id }, jwtSecret, {
-      expiresIn: '7d',
-    });
-    //added refresh token to user entity
-    user.refreshToken = refreshToken;
-    await this.userRepository.save(user);
-
-    return { accessToken, refreshToken };
-  }
 
   async logOut(userId: string): Promise<object> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
