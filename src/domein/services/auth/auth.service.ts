@@ -140,7 +140,7 @@ export class AuthService {
     const accessToken = sign({ ...user }, jwtSecret, { expiresIn: '7d' });
     // added access token to user entity
     user.accessToken = accessToken;
-    this.userRepository.save(user);
+    await this.userRepository.save(user);
     // Return the generated tokens as part of the AuthResponseDto
     return { accessToken };
   }
