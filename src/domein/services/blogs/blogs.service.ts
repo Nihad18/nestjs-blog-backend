@@ -15,6 +15,12 @@ import { Blogs, Tags, Users } from 'src/domein/entities';
 import { FileHelper } from 'src/domein/helpers/file-helper';
 import { Repository } from 'typeorm';
 
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
+
 @Injectable()
 export class BlogsService {
   constructor(
@@ -36,9 +42,11 @@ export class BlogsService {
 
     return blog;
   }
-  async getAllBlogs(): Promise<any> {
-    const blogs = await this.blogRepository.find();
-    return blogs;
+  async getAllBlogs(options: IPaginationOptions): Promise<Pagination<Blogs>> {
+    const queryBuilder = this.blogRepository.createQueryBuilder('blogs');
+    queryBuilder.orderBy('blogs.createdTime', 'DESC');
+
+    return paginate<Blogs>(queryBuilder, options);
   }
 
   async createBlog(
