@@ -33,6 +33,13 @@ export class UsersModule {
 
     consumer
       .apply(AccessTokenValidationMiddleware)
-      .forRoutes({ path: 'users', method: RequestMethod.ALL });
+      .exclude({
+        path: 'users/',
+        method: RequestMethod.GET,
+      })
+      .forRoutes(
+        { path: 'users/:id', method: RequestMethod.ALL },
+        { path: 'users/change-password/:id', method: RequestMethod.PATCH },
+      );
   }
 }
