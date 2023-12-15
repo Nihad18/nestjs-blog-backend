@@ -9,6 +9,12 @@ import {
 // typeorm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
+
 // dtos
 import {
   ChangePasswordDto,
@@ -30,21 +36,21 @@ export class UsersService {
     private readonly blogRepository: Repository<Blogs>,
   ) {}
 
-  async getAllUsers(): Promise<any> {
-    return this.userRepository.find({
-      relations: {
-        roles: true,
-      },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        profileImg: true,
-        roles: {
-          roleName: true,
-        },
-      },
-    });
+  async getAllUsers(options: IPaginationOptions): Promise<Pagination<Users>> {
+    const queryBuilder = this.userRepository.createQueryBuilder('users');
+
+    queryBuilder.select([
+      'users.id',
+      'users.fullName',
+      'users.email',
+      'users.profileImg',
+    ]);
+  
+    queryBuilder.leftJoinAndSelect('users.roles', 'roles');
+    queryBuilder.addSelect(['roles.roleName']);
+    queryBuilder.orderBy('users.fullName', 'DESC');
+
+    return paginate<Users>(queryBuilder, options);
   }
 
   async findUserById(id: string): Promise<UserResponseDto> {
