@@ -1,3 +1,55 @@
+# Available routes:
+
+
+
+| method | endpoint    | description          | params |
+| :----- | :---------- | :------------------- | :----- |
+| Post    | /auth/login     | user login    |        |
+| Post    | /auth/logout | user logout   |        |
+| Post  | /auth/register | user register |        |
+| Post  | /auth/send-otp | send otp code to user |        |
+| Post  | /auth/activate-account | user can be activate account with otp code |        |
+| Post  | /auth/reset-password | user can be reset password when user forgot password|        |
+
+| method | endpoint    | description          | params |
+| :----- | :---------- | :------------------- | :----- |
+| GET    | /users     | finds all users    |        |
+| GET    | /users/:id | finds user by id   |        |
+| Patch  | /users/:id | updates users by id |        |
+| Patch   | /users/change-password/:id     | creates new users   |        |
+| Delete   | /users/change-password/:id     |  removes user by id   |        |
+
+| method | endpoint  | description        | params |
+| :----- | :-------- | :----------------- | :----- |
+| GET    | /blogs     | finds all blogs    |        |
+| GET    | /blogs/:id | finds blog by id   |        |
+| POST   | /blogs     | creates new blog   |        |
+| Patch    | /blogs/:id | updates blog by id |
+| Delete    | /blogs/:id | removes blog by id |
+
+# Project Structure
+
+````sh
+    src
+    |_ application
+        |_ controllers
+        |_ dtos
+    |_ domain
+        |_ decorators
+        |_ entities
+        |_ enums
+        |_ guards
+        |_ helpers
+        |_ mail
+        |_ middlewares
+        |_ modules
+        |_ services
+    |_ infrastructure
+        |_ config
+        |_ modules
+
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
@@ -30,7 +82,7 @@
 
 ```bash
 $ npm install
-```
+````
 
 ## Running the app
 
