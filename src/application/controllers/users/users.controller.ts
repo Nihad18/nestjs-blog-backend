@@ -13,7 +13,12 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Query,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import {
   ChangePasswordDto,
   UpdateUserRequestDto,
@@ -25,6 +30,8 @@ import { JwtAuthGuard } from 'src/domein/guards/jwt-auth-guard';
 import { RolesGuard } from 'src/domein/guards/role-guard';
 import { UsersService } from 'src/domein/services/users/users.service';
 
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Users } from 'src/domein/entities';
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
@@ -32,8 +39,18 @@ export class UsersController {
   @Roles([Role.Editor, Role.Admin])
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
-  getAllUsers(): Promise<any> {
-    return this.userService.getAllUsers();
+  async getAllUsers(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+    @Req() req: Request,
+  ): Promise<Pagination<Users>> {
+    limit = limit > 100 ? 100 : limit;
+    const rootUrl = `${req.protocol}://${req.get('Host')}${req.originalUrl}`;
+    return await this.userService.getAllUsers({
+      page,
+      limit,
+      route: rootUrl,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
