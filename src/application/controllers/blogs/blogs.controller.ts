@@ -11,11 +11,15 @@ import {
   UseInterceptors,
   UsePipes,
   ValidationPipe,
-  Request,
+  Req,
   HttpException,
   Delete,
   Patch,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 // dtos
 import {
@@ -31,6 +35,9 @@ import { JwtAuthGuard } from 'src/domein/guards/jwt-auth-guard';
 import { RolesGuard } from 'src/domein/guards/role-guard';
 // services
 import { BlogsService } from 'src/domein/services/blogs/blogs.service';
+
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Blogs } from 'src/domein/entities';
 @Controller('blogs')
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
@@ -50,8 +57,18 @@ export class BlogsController {
     }
   }
   @Get()
-  async getAllBlogs(): Promise<any> {
-    return await this.blogsService.getAllBlogs();
+  async getAllBlogs(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+    @Req() req: Request,
+  ): Promise<Pagination<Blogs>> {
+    limit = limit > 100 ? 100 : limit;
+    const rootUrl = `${req.protocol}://${req.get('Host')}${req.originalUrl}`;
+    return await this.blogsService.getAllBlogs({
+      page,
+      limit,
+      route: rootUrl,
+    });
   }
   @Post('/create')
   @Roles([Role.Admin])
@@ -61,7 +78,7 @@ export class BlogsController {
   async createBlog(
     @Body() blogRequestDto: CreateBlogRequestDto,
     @UploadedFile() file,
-    @Request() req,
+    @Req() req,
   ): Promise<void | object> {
     try {
       const userId = await req.user.id;
@@ -83,7 +100,7 @@ export class BlogsController {
   @UseInterceptors(FileInterceptor('coverImg'))
   async updateBlog(
     @Param('id') blogId: string,
-    @Request() req,
+    @Req() req,
     @Body() blogRequestDto: UpdateBlogRequestDto,
     @UploadedFile() file,
   ): Promise<void | object> {
@@ -104,7 +121,7 @@ export class BlogsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   async deleteBlog(
     @Param('id') blogId: string,
-    @Request() req,
+    @Req() req,
   ): Promise<void | object> {
     try {
       const userId = await req.user.id;
