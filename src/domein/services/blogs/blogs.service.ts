@@ -44,7 +44,7 @@ export class BlogsService {
   }
   async getAllBlogs(options: IPaginationOptions): Promise<Pagination<Blogs>> {
     const queryBuilder = this.blogRepository.createQueryBuilder('blogs');
-    queryBuilder.orderBy('blogs.createdTime', 'DESC');
+    queryBuilder.orderBy('blogs.order', 'DESC');
 
     return paginate<Blogs>(queryBuilder, options);
   }
