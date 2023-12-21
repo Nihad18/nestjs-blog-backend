@@ -88,6 +88,7 @@ export class BlogsService {
     newBlog.content = blogRequestDto.content;
     newBlog.summary = blogRequestDto.summary;
     newBlog.published = blogRequestDto.published;
+    newBlog.order = blogRequestDto.order;
     newBlog.coverImg = coverImg;
     newBlog.createdTime = new Date().toDateString();
 
