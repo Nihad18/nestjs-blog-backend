@@ -8,6 +8,7 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   IsOptional,
+  IsNumber,
 } from 'class-validator';
 import { Tags } from 'src/domein/entities';
 
@@ -17,6 +18,10 @@ export class CreateBlogRequestDto {
   @MinLength(10)
   @MaxLength(100)
   slug: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  order: number;
 
   @IsString()
   @IsNotEmpty()
@@ -46,6 +51,10 @@ export class UpdateBlogRequestDto {
   @IsOptional()
   slug: string;
 
+  @IsNumber()
+  @IsNotEmpty()
+  order: number;
+  
   @IsString()
   @IsNotEmpty()
   @MinLength(250)
