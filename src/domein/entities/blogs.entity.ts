@@ -19,8 +19,11 @@ export class Blogs {
   @Generated('uuid')
   id: string;
 
-  @Column({unique: true})
+  @Column({ unique: true })
   slug: string;
+
+  @Column({ default: 0 })
+  order: number;
 
   @Column()
   content: string;
