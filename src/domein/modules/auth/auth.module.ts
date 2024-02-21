@@ -43,7 +43,7 @@ dotenv.config();
       redis: {
         password: process.env.REDIS_PASSWORD,
         host: process.env.REDIS_HOST,
-        port: 17082,
+        port: 14763,
       },
     }),
     BullModule.registerQueue({
