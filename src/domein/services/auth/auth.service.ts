@@ -183,7 +183,7 @@ export class AuthService {
 
       // Save the new role to the database
       await this.roleRepository.save(newRole);
-
+      await this.sendOtp({ email: savedUser.email });
       // Return a success message if the user creation and role assignment are successful
       return { message: 'User created successfully' };
     } catch (err) {
