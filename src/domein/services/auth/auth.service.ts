@@ -17,7 +17,7 @@ import { Repository } from 'typeorm';
 import {
   ActivateAccountRequestDto,
   AuthRequestDto,
-  ResetPasswordRequestDto,
+  ForgotPasswordRequestDto,
   SendOtpRequestDto,
 } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
@@ -52,7 +52,6 @@ export class AuthService {
       user.otpCode = otpCode;
       user.otpCodeCreatedAt = new Date();
       await this.userRepository.save(user);
-
       // Send OTP code via email
       await this.emailQueue.add('send-otp', { email, fullName, otpCode });
       return { message: 'OTP sent successfully' };
@@ -78,8 +77,8 @@ export class AuthService {
     return { message: 'Account activated successfully' };
   }
 
-  async resetPassword(resetPasswordRequestDto: ResetPasswordRequestDto) {
-    const { otpCode, newPassword } = resetPasswordRequestDto;
+  async forgotPassword(forgotPasswordRequestDto: ForgotPasswordRequestDto) {
+    const { otpCode, newPassword } = forgotPasswordRequestDto;
     const user = await this.userRepository.findOne({
       where: { otpCode: otpCode },
     });
