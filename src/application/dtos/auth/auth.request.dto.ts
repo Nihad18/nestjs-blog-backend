@@ -22,7 +22,7 @@ export class AuthRequestDto {
   })
   password: string;
 }
-export class ResetPasswordRequestDto {
+export class ForgotPasswordRequestDto {
   @IsString()
   @IsNotEmpty()
   otpCode: string;
