@@ -25,7 +25,7 @@ export class AuthRequestDto {
 export class ForgotPasswordRequestDto {
   @IsString()
   @IsNotEmpty()
-  otpCode: string;
+  email: string;
 
   @IsString()
   @MinLength(7)
