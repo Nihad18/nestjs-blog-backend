@@ -14,7 +14,7 @@ import {
 import {
   ActivateAccountRequestDto,
   AuthRequestDto,
-  ResetPasswordRequestDto,
+  ForgotPasswordRequestDto,
   SendOtpRequestDto,
 } from 'src/application/dtos/auth/auth.request.dto';
 import { AuthResponseDto } from 'src/application/dtos/auth/auth.response.dto';
@@ -102,12 +102,12 @@ export class AuthController {
   }
   @Post('reset-password')
   @UsePipes(ValidationPipe)
-  async resetPassoword(
-    @Body() resetPasswordRequestDto: ResetPasswordRequestDto,
+  async forgotresetPassword(
+    @Body() forgotPasswordRequestDto: ForgotPasswordRequestDto,
   ): Promise<object | void> {
     try {
-      const response = await this.authService.resetPassword(
-        resetPasswordRequestDto,
+      const response = await this.authService.forgotPassword(
+        forgotPasswordRequestDto,
       );
       return response;
     } catch (error) {
