@@ -86,7 +86,7 @@ export class AuthController {
   async checkOtp(
     @Body() checkOtpRequestDto: ActivateAccountRequestDto,
   ): Promise<void> {
-    const response = await this.authService.checkOtpCode(
+    const response = await this.authService.checkOtp(
       checkOtpRequestDto.email,
       checkOtpRequestDto.otpCode,
     );
