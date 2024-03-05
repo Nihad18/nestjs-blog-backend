@@ -80,6 +80,19 @@ export class AuthController {
     const response = await this.authService.sendOtp(sendOtpRequestDto);
     return response;
   }
+
+  @Post('/check-otp')
+  @UsePipes(ValidationPipe)
+  async checkOtp(
+    @Body() checkOtpRequestDto: ActivateAccountRequestDto,
+  ): Promise<void> {
+    const response = await this.authService.checkOtpCode(
+      checkOtpRequestDto.email,
+      checkOtpRequestDto.otpCode,
+    );
+    return response;
+  }
+
   @Post('activate-account')
   @UsePipes(ValidationPipe)
   async activateAccount(
@@ -100,9 +113,10 @@ export class AuthController {
       }
     }
   }
+
   @Post('reset-password')
   @UsePipes(ValidationPipe)
-  async forgotresetPassword(
+  async forgotPassword(
     @Body() forgotPasswordRequestDto: ForgotPasswordRequestDto,
   ): Promise<object | void> {
     try {
