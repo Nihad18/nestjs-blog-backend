@@ -85,12 +85,22 @@ export class AuthController {
   @UsePipes(ValidationPipe)
   async checkOtp(
     @Body() checkOtpRequestDto: ActivateAccountRequestDto,
-  ): Promise<void> {
-    const response = await this.authService.checkOtp(
-      checkOtpRequestDto.email,
-      checkOtpRequestDto.otpCode,
-    );
-    return response;
+  ): Promise<void | object> {
+    try {
+      const response = await this.authService.checkOtp(
+        checkOtpRequestDto.email,
+        checkOtpRequestDto.otpCode,
+      );
+      return response;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new HttpException({ error: error.message }, HttpStatus.NOT_FOUND);
+      } else if (error instanceof HttpException) {
+        throw new HttpException({ error: error.message }, error.getStatus());
+      } else {
+        return { error: 'An unexpected error occurred' };
+      }
+    }
   }
 
   @Post('activate-account')
